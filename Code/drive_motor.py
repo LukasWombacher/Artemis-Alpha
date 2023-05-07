@@ -3,7 +3,7 @@ GPIO.setmode(GPIO.BCM)
 import edit_json
 import time
 
-speed = 100
+speed = 0
 on_bool = True
 
 
