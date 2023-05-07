@@ -1,0 +1,15 @@
+{
+    "led_brightness": 70,
+    "led_speed": 100,
+    "led_effekte": true,
+    "led_matrix": true,
+    "engine_speed": 100,
+    "sound": 100,
+    "data_view": true,
+    "temperature": 25,
+    "gyroscope_drift": {
+        "x": -1.9745580300283865,
+        "y": -0.8374652649153403,
+        "z": -3.0860270854317893
+    }
+}
