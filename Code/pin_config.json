@@ -1,0 +1,50 @@
+{
+    "rotary_encoder":
+    {
+        "pin_name": ["pin_sw", "pin_dt", "pin_clk"],
+        "pin_port": [21, 16, 19],
+        "status": ["IN", "IN", "IN"]
+    },
+    "display":
+    {
+        "pin_name": ["pin_sda", "pin_scl"],
+        "pin_port": [2, 3],
+        "status": [null, null]
+    },
+    "ultrasonic_front":
+    {
+        "pin_name": ["pin_trigger", "pin_echo"],
+        "pin_port": [23, 24],
+        "status": ["OUT", "IN"]
+    },
+    "ultrasonic_left":
+    {
+        "pin_name": ["pin_trigger", "pin_echo"],
+        "pin_port": [9, 11],
+        "status": ["OUT", "IN"]
+    },
+    "ultrasonic_right":
+    {
+        "pin_name": ["pin_trigger", "pin_echo"],
+        "pin_port": [25, 8],
+        "status": ["OUT", "IN"]
+    },
+    "stepper_motor":
+    {
+        "pin_name": ["pin_step_1", "pin_step_2", "pin_step_3", "pin_step_4"],
+        "pin_port": [4, 17, 27, 22],
+        "status": ["OUT", "OUT", "OUT", "OUT"]
+    },
+    "drive_motor":
+    {
+        "pin_name": ["pin_drive"],
+        "pin_port": [10],
+        "status": ["OUT"]
+    },
+    "led_strip":
+    {
+        "pin_name": ["pin_led"],
+        "pin_port": [7],
+        "status": ["OUT"]
+    }
+}
