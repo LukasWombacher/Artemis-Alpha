@@ -8,7 +8,7 @@ import time
 
 #config logger
 
-logging.basicConfig(level=logging.INFO, filename="log/log_" + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ".log", filemode="w", format="%(asctime)s - %(levelname)s - %(filename)s/%(funcName)s  - %(message)s")
+logging.basicConfig(level=logging.INFO, filename="/home/pi/Artemis-Alpha/Code/log/log_" + str(datetime.now().strftime("%Y-%m-%d %H:%M:%S")) + ".log", filemode="w", format="%(asctime)s - %(levelname)s - %(filename)s/%(funcName)s  - %(message)s")
 logging.info("main.py started")
 
 """

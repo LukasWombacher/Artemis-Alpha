@@ -74,7 +74,7 @@ def icon(icon):
     global last_display_info
     if icon != last_display_info:
         oled.cls()
-        picture = Image.open("pictures/"+icon)
+        picture = Image.open("/home/pi/Artemis-Alpha/Code/pictures/"+icon)
         draw.bitmap((32, 0), picture, fill=1)
         oled.display()
         last_display_info = icon
@@ -83,7 +83,7 @@ def logo(icon):
     global last_display_info
     if icon != last_display_info:
         oled.cls()
-        picture = Image.open("pictures/"+icon)
+        picture = Image.open("/home/pi/Artemis-Alpha/Code/pictures/"+icon)
         picture = picture.rotate(180)
         draw.bitmap((0, 0), picture, fill=1)
         oled.display()

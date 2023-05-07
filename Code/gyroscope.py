@@ -6,7 +6,7 @@ from mpu9250_i2c import *
 from threading import Thread
 time.sleep(1) # delay necessary to allow mpu9250 to settle
 
-with open("settings.json", "r") as settings_file:
+with open("/home/pi/Artemis-Alpha/Code/settings.json", "r") as settings_file:
     settings_data = json.load(settings_file)
     bias_x = settings_data["gyroscope_drift"]["x"]
     bias_y = settings_data["gyroscope_drift"]["y"]

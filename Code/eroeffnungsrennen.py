@@ -74,6 +74,7 @@ def main():
     global direction, d_switch, curve_count, running, curve_goal
     gyroscope.restart()
     drive_motor.speed = 100
+    print("start")
     while direction == 2:
         if ultrasonic_savety_bigger("ultrasonic_left", 200, 0):
             direction = 0
@@ -105,6 +106,8 @@ def main2():
 
 thread_1 = Thread(target=gyroscope.record_degree)
 thread_2 = Thread(target=main)
+thread_3 = Thread(target=drive_motor.on)
 
-thread_1.start()
-thread_2.start()
+#thread_1.start()
+#thread_2.start()
+#thread_3.start()
