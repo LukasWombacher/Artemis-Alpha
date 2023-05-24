@@ -11,11 +11,36 @@ curve_count = 0
 running = True
 true_count_bigger = [0, 0, 0, 0, 0, 0, 0, 0]
 true_count_smaler = [0, 0, 0, 0, 0, 0, 0, 0]
+distance_left = [0]*8
+distance_right = [0]*8
 curve_goal = 4*1
 
+def get_start_direction(distance):
+    len = 8
+    pos = 0
+    while direction == 2:
+        time.sleep(0.1)
+        distance_left[pos % len], distance_right[pos % len] = ultrasonic.get_distance("ultrasonic_left"), ultrasonic.get_distance("ultrasonic_right")
+        pos += 1
+        if pos >= len:
+            left_big = 0
+            right_big = 0
+            for i in distance_left:
+                if 150 < i < 400:
+                    left_big += 1
+            for i in distance_right:
+                if 150 < i < 400:
+                    right_big += 1
+            print(left_big, right_big)
+        print(distance_right)
+                
+                
+    
 def ultrasonic_savety_bigger(sensor, distance, num):
     global true_count_bigger
-    if ultrasonic.get_distance(sensor) >= distance:
+    a = ultrasonic.get_distance(sensor)
+    print(sensor, distance, num, a)
+    if a >= distance:
         true_count_bigger[num] += 1
     else:
         true_count_bigger[num] = 0
@@ -77,18 +102,12 @@ def curve():
 
 def main():
     global direction, d_switch, curve_count, running, curve_goal
-    gyroscope.restart()
-    drive_motor.speed = 75
+    #gyroscope.restart()
+    #drive_motor.speed = 75
     print("start")
-    while direction == 2:
-        if ultrasonic_savety_bigger("ultrasonic_left", 150, 0):
-            direction = 0
-        time.sleep(0.01)
-        if ultrasonic_savety_bigger("ultrasonic_right", 150, 1):
-            direction = 1
-        time.sleep(0.01)
-        
-        print(d_switch[direction])
+    get_start_direction(150)
+    print(d_switch[direction])
+        #print(ultrasonic.get_distance("ultrasonic_rigt"))
     curve()
     while running:
         pid_reset()
@@ -107,12 +126,6 @@ def main():
     print("ENDE")
 
 
-def main2():
-    gyroscope.restart()
-    print("Ready")
-    drive_motor.speed = 75
-    while True:
-        accurate()
 
 thread_1 = Thread(target=gyroscope.record_degree)
 thread_2 = Thread(target=main)
