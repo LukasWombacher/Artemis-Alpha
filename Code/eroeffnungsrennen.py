@@ -13,6 +13,10 @@ true_count_bigger = [0, 0, 0, 0, 0, 0, 0, 0]
 true_count_smaler = [0, 0, 0, 0, 0, 0, 0, 0]
 distance_left = [0]*8
 distance_right = [0]*8
+distance_front = [0]*8
+distance_side = [0]*8#
+next_len = 8
+next_pos = 0
 curve_goal = 4*1
 
 def get_start_direction(distance):
@@ -40,7 +44,27 @@ def get_start_direction(distance):
         print(distance_left)
         print(distance_right)
                 
-                
+def is_next_curve():
+    global direction, d_switch, distance_front, distance_side, next_len, next_pos
+    distance_front[next_pos % next_len], distance_side[next_pos % next_len] = ultrasonic.get_distance("ultrasonic_front"), ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
+    next_pos += 1
+    if next_pos >= next_len:
+        next_front_smal = 0
+        next_side_big = 0
+        for i in distance_front:
+            if 0 < i < 100:
+                next_front_smal += 1
+        for i in distance_side:
+            if 100 < i < 1000:
+                next_side_big += 1
+        print(distance_side)
+        print(next_side_big, next_front_smal)
+        if next_front_smal >= 5 and next_side_big >= 5:
+            return True
+        else:
+            return False
+    return False
+    
     
 def ultrasonic_savety_bigger(sensor, distance, num):
     global true_count_bigger
@@ -86,9 +110,12 @@ def pid_reset():
 def accurate():
     global curve_count, direction, d_switch, Kp, Ki, Kd, prev_error, integral
     lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)))
-    print(lenk*0.15)
+    lenk_faktor = 1.5
+    print(lenk*lenk_faktor)
     lenk_direction = "right" if lenk > 0 else "left"
-    stepper_motor.turn_distance(50, round(abs(lenk*0.15)), lenk_direction)
+    anti_lenk_direction = "left" if lenk > 0 else "right"
+    stepper_motor.turn_distance(50, round(abs(lenk*lenk_faktor)), lenk_direction)
+    stepper_motor.turn_distance(50, round(abs(lenk*lenk_faktor)), anti_lenk_direction)
     """lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)))
     error = lenk  # aktueller Fehler
     derivative = error - prev_error  # Ableitung des Fehlers
@@ -117,21 +144,17 @@ def curve():
 def main():
     global direction, d_switch, curve_count, running, curve_goal
     gyroscope.restart()
-    drive_motor.speed = 20
+    drive_motor.speed = 30
     print("start")
     get_start_direction(150)
     print(d_switch[direction])
     curve()
-    #drive_motor.speed = 0
-    #time.sleep(1000000)
     while running:
         pid_reset()
-        while (not ultrasonic_savety_smaler("ultrasonic_front", 100, 4)) and (not ultrasonic_savety_bigger("ultrasonic_"+d_switch[direction], 200, 2)):
+        while not is_next_curve():
             accurate()
             time.sleep(0.01)
         print("Korrektur Ende")
-        while (not ultrasonic_savety_smaler("ultrasonic_"+d_switch[direction], 200, 3)): #(not ultrasonic_savety_smaler("ultrasonic_front", 50, 1)) or 
-            time.sleep(0.01)
         curve()
         if curve_count >= curve_goal:
             while not ultrasonic_savety_smaler("ultrasonic_front", 150, 2):
