@@ -26,7 +26,7 @@
     "ultrasonic_right":
     {
         "pin_name": ["pin_trigger", "pin_echo"],
-        "pin_port": [25, 8],
+        "pin_port": [15, 14],
         "status": ["OUT", "IN"]
     },
     "stepper_motor":
