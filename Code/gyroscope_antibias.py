@@ -30,13 +30,13 @@ drift_z = counter["sum_z"] / counter["round"]
 def new_func(settings_file):
     return settings_file
 
-with open("settings.json", "r") as settings_file:
+with open("/home/pi/Artemis-Alpha/Code/settings.json", "r") as settings_file:
     settings_data = json.load(new_func(settings_file))
     settings_data["gyroscope_drift"]["x"] = drift_x
     settings_data["gyroscope_drift"]["y"] = drift_y
     settings_data["gyroscope_drift"]["z"] = drift_z
-os.remove("settings.json")
-with open("settings.json", "w") as new_settings_file:
+os.remove("/home/pi/Artemis-Alpha/Code/settings.json")
+with open("/home/pi/Artemis-Alpha/Code/settings.json", "w") as new_settings_file:
     json.dump(settings_data, new_settings_file, indent=4)
 
 time.sleep(1)
