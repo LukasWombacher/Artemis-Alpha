@@ -14,13 +14,14 @@ true_count_smaler = [0, 0, 0, 0, 0, 0, 0, 0]
 distance_left = [0]*8
 distance_right = [0]*8
 distance_front = [0]*8
-distance_side = [0]*8#
+distance_side = [0]*8
 next_len = 8
 next_pos = 0
-curve_goal = 4*1
+curve_goal = 4*3
+correction_degree = 4
 
 def get_start_direction(distance):
-    global direction, distance_left, distance_right
+    global direction, distance_left, distance_right, correction_degree
     len = 8
     pos = 0
     while direction == 2:
@@ -41,10 +42,11 @@ def get_start_direction(distance):
                 direction = 0
             if right_big >= 4:
                 direction = 1
+                correction_degree *= -1
         print(distance_left)
         print(distance_right)
                 
-def is_next_curve():
+def is_next_curve(opt_front_distance):
     global direction, d_switch, distance_front, distance_side, next_len, next_pos
     distance_front[next_pos % next_len], distance_side[next_pos % next_len] = ultrasonic.get_distance("ultrasonic_front"), ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
     next_pos += 1
@@ -52,7 +54,7 @@ def is_next_curve():
         next_front_smal = 0
         next_side_big = 0
         for i in distance_front:
-            if 0 < i < 100:
+            if 0 < i < opt_front_distance:
                 next_front_smal += 1
         for i in distance_side:
             if 100 < i < 1000:
@@ -108,29 +110,21 @@ def pid_reset():
     integral = 0  # Summe der Fehler über die Zeit
 
 def accurate():
-    global curve_count, direction, d_switch, Kp, Ki, Kd, prev_error, integral
-    lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)))
-    lenk_faktor = 1.5
+    global curve_count, direction, d_switch, correction_degree
+    lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)-correction_degree))
+    lenk_faktor = 1
     print(lenk*lenk_faktor)
     lenk_direction = "right" if lenk > 0 else "left"
     anti_lenk_direction = "left" if lenk > 0 else "right"
     stepper_motor.turn_distance(50, round(abs(lenk*lenk_faktor)), lenk_direction)
     stepper_motor.turn_distance(50, round(abs(lenk*lenk_faktor)), anti_lenk_direction)
-    """lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)))
-    error = lenk  # aktueller Fehler
-    derivative = error - prev_error  # Ableitung des Fehlers
-    integral = integral*0.5 + error  # Summe der Fehler aktualisieren
-    prev_error = error  # vorherigen Fehler aktualisieren
-    correction = Kp * error + Ki * integral + Kd * derivative  # Korrekturwert berechnen
-    pid_direction = "right" if correction > 0 else "left"  # Richtung basierend auf der Korrektur wählen
-    stepper_motor.turn_distance(45, abs(correction), pid_direction)  # Ansteuerung des Lenkmotors"""
 
 def curve():
-    global direction, d_switch, curve_count
-    print("Kurve")
+    global direction, d_switch, curve_count, correction_degree
+    print("Kurve" + str(curve_count))
     curve_count += 1
     stepper_motor.turn_distance(100, 50, d_switch[direction])
-    while abs(gyroscope.get_abs_degree()) - (90*(curve_count-1)) < 75:
+    while abs(gyroscope.get_abs_degree()) - (90*(curve_count-1)-correction_degree) < 77:
         time.sleep(0.001)
     stepper_motor.turn_distance(100, 50, d_switch[not direction])
     """i = 0
@@ -142,20 +136,28 @@ def curve():
     print("lenk fertig")
 
 def main():
-    global direction, d_switch, curve_count, running, curve_goal
+    global direction, d_switch, curve_count, running, curve_goal, distance_side, distance_front
     gyroscope.restart()
-    drive_motor.speed = 30
+    drive_motor.speed = 20
     print("start")
     get_start_direction(150)
     print(d_switch[direction])
+    while not is_next_curve(80):
+        time.sleep(0.01)
+    drive_motor.speed = 35
     curve()
+    drive_motor.speed = 20
     while running:
-        pid_reset()
-        while not is_next_curve():
+        distance_front, distance_side = [0]*8, [0]*8
+        while not is_next_curve(110):
             accurate()
             time.sleep(0.01)
         print("Korrektur Ende")
+        while not is_next_curve(80):
+            time.sleep(0.01)
+        drive_motor.speed = 35
         curve()
+        drive_motor.speed = 20
         if curve_count >= curve_goal:
             while not ultrasonic_savety_smaler("ultrasonic_front", 150, 2):
                 accurate()
