@@ -31,7 +31,34 @@ def main():
     except KeyboardInterrupt:
         capture.release()
         server.socket.close()
-        
+
+def capture_image():
+    # Kamera-Objekt initialisieren
+    capture = cv2.VideoCapture(0)
+    
+    # Überprüfen, ob die Kamera erfolgreich geöffnet wurde
+    if not capture.isOpened():
+        print("Fehler beim Öffnen der Kamera.")
+        return
+    
+    # Bild von der Kamera erfassen
+    ret, frame = capture.read()
+    
+    # Überprüfen, ob das Bild erfolgreich erfasst wurde
+    if not ret:
+        print("Fehler beim Erfassen des Bildes.")
+        return
+    
+    # Bild im aktuellen Ordner speichern
+    image_path = "captured_image.jpg"
+    cv2.imwrite(image_path, frame)
+    
+    # Kamera-Objekt freigeben
+    capture.release()
+    
+    print("Bild erfolgreich erfasst und gespeichert:", image_path)
+
 if __name__=='__main__':
-    main()
+    #main()
+    capture_image()
     
