@@ -1,19 +1,11 @@
-"""import time
+import time
 import ultrasonic
 print("start")
 while True:
     print(ultrasonic.get_distance("ultrasonic_front"))
-    time.sleep(0.3)"""
-from picamera import PiCamera
-from time import sleep
-
-camera = PiCamera()
-
-camera.start_preview()
-sleep(5)
-camera.capture('/home/pi/Desktop/image.jpg')
-camera.stop_preview()
-"""import time, ultrasonic, gyroscope
+    time.sleep(0.3)
+"""
+import time, ultrasonic, gyroscope
 from threading import Thread
 direction = 2
 d_switch = ["left", "right", "error"]
@@ -26,28 +18,31 @@ distance_right = [0]*8
 curve_goal = 4*1
 
 def get_start_direction():
-    distance = 150
-    len = 8
-    pos = 0
-    while direction == 2:
-        time.sleep(0.1)
-        distance_left[pos % len], distance_right[pos % len] = ultrasonic.get_distance("ultrasonic_left"), ultrasonic.get_distance("ultrasonic_right")
-        pos += 1
-        if pos >= len:
-            left_big = 0
-            right_big = 0
-            for i in distance_left:
-                if 150 < i < 400:
-                    left_big += 1
-            for i in distance_right:
-                if 150 < i < 400:
-                    right_big += 1
-            print(left_big, right_big)
-        print(distance_right)"""
-                
-"""
+    while True:
+        distance = 150
+        len = 8
+        pos = 0
+        while direction == 2:
+            time.sleep(0.1)
+            distance_left[pos % len], distance_right[pos % len] = 20, ultrasonic.get_distance("ultrasonic_right") #ultrasonic.get_distance("ultrasonic_left")
+            pos += 1
+            if pos >= len:
+                left_big = 0
+                right_big = 0
+                for i in distance_left:
+                    if 150 < i < 400:
+                        left_big += 1
+                for i in distance_right:
+                    if 150 < i < 400:
+                        right_big += 1
+                print(left_big, right_big)
+            print(distance_right)
+            print(distance_left)
+            
+            
 thread_1 = Thread(target=gyroscope.record_degree)
 thread_2 = Thread(target=get_start_direction)
 
 thread_1.start()
-thread_2.start()"""
+thread_2.start()
+"""
