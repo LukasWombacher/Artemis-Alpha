@@ -30,7 +30,6 @@ def get_start_direction(distance):
         #time.sleep(0.1)
         distance_left[pos % len], distance_right[pos % len] = ultrasonic.get_distance("ultrasonic_left"), ultrasonic.get_distance("ultrasonic_right")
         pos += 1
-        print("A")
         if pos >= len:
             left_big = 0
             right_big = 0
@@ -87,19 +86,19 @@ def ultrasonic_savety_smaler(sensor, distance, num):
 
 def accurate():
     global curve_count, direction, d_switch, correction_degree
-    if ultrasonic.get_distance("ultrasonic_left") <= 16:
+    if ultrasonic.get_distance("ultrasonic_left") <= 18:
         lenk_direction, anti_lenk_direction = "right", "left"
-        lenk = 25
+        lenk = 30
         print("wand links")
         stepper_motor.turn_distance(60, round(abs(lenk)), lenk_direction)
-        time.sleep(0.4)
+        time.sleep(0.45)
         stepper_motor.turn_distance(100, round(abs(lenk)), anti_lenk_direction)
-    elif ultrasonic.get_distance("ultrasonic_right") <= 16:
+    elif ultrasonic.get_distance("ultrasonic_right") <= 18:
         lenk_direction, anti_lenk_direction = "left", "right"
-        lenk = 25
+        lenk = 30
         print("wand rechts")
         stepper_motor.turn_distance(60, round(abs(lenk)), lenk_direction)
-        time.sleep(0.4)
+        time.sleep(0.45)
         stepper_motor.turn_distance(100, round(abs(lenk)), anti_lenk_direction)
     else:
         lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)-correction_degree))
@@ -138,7 +137,7 @@ def main():
     drive_motor.speed = v_gerade
     while running:
         distance_front, distance_side = [0]*3, [0]*3
-        while not ultrasonic_savety_smaler("ultrasonic_front", 125, 0):
+        while not ultrasonic_savety_smaler("ultrasonic_front", 140, 0):
             accurate()
             time.sleep(0.01)
         print("Korrektur Ende")
