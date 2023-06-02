@@ -17,7 +17,7 @@ Das Herzstück der Sensoren für das Hindernisrennen ist die Kamera. Sie erkennt
 
 ![20230531_172955](https://github.com/LukasWombacher/Artemis-Alpha/assets/109914834/91277caa-cfe3-4a29-a809-8140bc1d091a)
 
-## Teileliste
+## Stückliste
 
 3x Ultrasonic Sensor Module DC 5V HY-SRF05
 
