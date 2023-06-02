@@ -5,4 +5,4 @@ Das Auto ist großteils 3D gedruckt. Die elektronischen Komponenten sind handels
 
 Weitere Informationen sidn unter den Punkten 1 bis 3 und bei den Fotos zu finden.
 
-Wenn Sie fragen haben kommen Siie gerne auf uns zu.
+Wenn Sie Fragen haben kommen Siie gerne auf uns zu.
