@@ -5,6 +5,10 @@ import time
 import gyroscope
 from threading import Thread
 
+"""
+setzt alle wichtigen Konstanten und Variabeln
+"""
+
 direction = 2
 d_switch = ["left", "right", "error"]
 curve_count = 0
@@ -21,6 +25,10 @@ correction_degree = 10
 v_kurve = 40
 v_gerade = 30
 v_messen = 25
+
+"""
+überprüft in welche Richtung das Auto ausgerichtet ist und ob in oder gegen den Uhrzeigersinn gefahren wird
+"""
 
 def get_start_direction(distance):
     global direction, distance_left, distance_right, correction_degree
@@ -47,7 +55,11 @@ def get_start_direction(distance):
                 correction_degree *= -1
         print(distance_left)
         print(distance_right)
-                
+
+"""
+prüft ob die nächste Kurve gefahren werden kann
+"""
+      
 def is_next_curve(opt_front_distance):
     global direction, d_switch, distance_front, distance_side, next_len, next_pos
     distance_front[next_pos % next_len], distance_side[next_pos % next_len] = ultrasonic.get_distance("ultrasonic_front"), ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
@@ -69,6 +81,10 @@ def is_next_curve(opt_front_distance):
             return False
     return False
 
+"""
+überprüft ob die letzten 3 Messungen eines Ultraschallsensors über dem Schwellwert lagen, um nicht von Fehlerwerten beeinflusst zu werden
+"""
+
 def ultrasonic_savety_smaler(sensor, distance, num):
     global true_count_smaler
     a = ultrasonic.get_distance(sensor)
@@ -83,6 +99,10 @@ def ultrasonic_savety_smaler(sensor, distance, num):
         return True
     else:
         return False
+
+"""
+stellt sicher das in den geraden ABschnitten geradeaus gefahren wird und korigiert falls schief oder gegen eine Wand gesteuert wird
+"""
 
 def accurate():
     global curve_count, direction, d_switch, correction_degree
@@ -110,6 +130,10 @@ def accurate():
         stepper_motor.turn_distance(45, round(abs(lenk)), lenk_direction)
         stepper_motor.turn_distance(45, round(abs(lenk)), anti_lenk_direction)
 
+"""
+fährt eine 90° Kurve
+"""
+
 def curve():
     global direction, d_switch, curve_count, correction_degree
     print("Kurve " + str(curve_count))
@@ -119,6 +143,10 @@ def curve():
         time.sleep(0.001)
     stepper_motor.turn_distance(100, 50, d_switch[not direction])
     print("lenk fertig")
+
+"""
+Main ist die Hauptroutine des Programms die standardmäßig ausgeführt wird und die die anderen Funktionen aufruft und koordiniert.
+"""
 
 def main():
     global direction, d_switch, curve_count, running, curve_goal, distance_side, distance_front
@@ -157,7 +185,9 @@ def main():
     import reset
     print("ENDE")
 
-
+"""
+es werden Threads gestartet um mehrere Messungen und Abläufe in Echtzeit parallel ausführen zu können
+"""
 
 thread_1 = Thread(target=gyroscope.record_degree)
 thread_2 = Thread(target=main)
