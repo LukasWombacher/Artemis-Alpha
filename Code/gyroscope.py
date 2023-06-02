@@ -35,7 +35,7 @@ def record_degree():
                 continue
             counter["round"] += 1
             counter["sum_z"] += wz
-            time.sleep(0.1)
+            time.sleep(0.04)
         stop_recording = True
 
 def get_abs_degree():
