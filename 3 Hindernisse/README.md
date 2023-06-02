@@ -14,3 +14,7 @@ Wie bereits oben erwähnnt ist die Hinderniserkennung Teil der Geradenkorrektur.
 Anhand der Breite wird eine ungefähre Entfernung errechnet. Dann wird das am nächsten gelegene Hinderniss ausgewählt. Anhand der x-Position und der aktuellen Drehung der Gyroscops wird der benötigte Lenkwinkel berechnet. Die Lenkgeschwindigkeit ist abhängig von der Entfernung und die Lenkrichtung abhängig von der Farbe.
 
 Dieser Ablauf wird auf der ganzen Gerade wiederholt, solange Hindernisse vorhanden sind. ANsonsten greift die Gyroscop basierte Geradenkorrektur aus dem Eröffnungsrennen.
+
+## Struktogramm
+
+![image](https://github.com/LukasWombacher/Artemis-Alpha/assets/109914834/221009e4-3d8c-4f53-8889-8147fb06ec0a)
