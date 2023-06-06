@@ -8,4 +8,4 @@ In den Ordnern 1-5 und 7 sind die Informationen entsprechend den Titeln und den 
 
 Dort sind alle CAD Modelle und der gesamte Code zusehen.
 
-Bei Fragen kommen Sie gerne auf uns zu.
+Bei Fragen kommen Sie gerne auf uns zu!
