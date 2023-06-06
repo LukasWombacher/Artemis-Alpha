@@ -2,7 +2,7 @@
 
 ## Ansicht von allen Seiten
 
-Hier sind Bilder von allen sechs Seiten des AUtos zu sehen, wie in den Regeln zur Dokumentation gefordert.
+Hier sind Bilder von allen sechs Seiten des Autos zu sehen, wie in den Regeln zur Dokumentation gefordert.
 
 ## Entwicklung
 
@@ -10,7 +10,7 @@ Hier sind Bilder aus verschiendenen Stadien des Entwicklungsprozesses zu sehen.
 
 ## Beauty Shots
 
-Hier wird das Auto mit passender Lichtstimmung in Scene gesetzt.
+Hier wird das Auto mit passender Lichtstimmung in Szene gesetzt.
 
 ## Detailansicht
 
