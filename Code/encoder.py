@@ -1,4 +1,5 @@
-import GPIO, time, edit_json
+import time, edit_json
+import RPi.GPIO as GPIO
 
 pins_rotary_encoder = edit_json.get_pin_ports("rotary_encoder")
 sw_Pin = pins_rotary_encoder[0]
