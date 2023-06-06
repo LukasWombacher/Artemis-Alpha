@@ -2,7 +2,7 @@
 
 ## Fahrzeugaufbau
 
-Alle Konstruktionsteile des Fahrzeugs sind selbst designt und 3D gedruckt. Die Basis bildet dabei den Mittelteil, das ergänzt wird durch die Getriebehalterung, die Einzelteile der Lenkung und sämtliche kleineren Anbauteile. Die wichtigsten CAD-Modelle für einen groben Überblick über Aufbau und Struktur des Fahrzeugs liegen hier im Motorisierungsordner. Alle weiteren Modelle, die für den Bau das Notwendig sind, sind im CAD-Modelle Ordner zu finden.
+Alle Konstruktionsteile des Fahrzeugs sind selbst designt und 3D gedruckt. Die Basis bildet dabei das Mittelteil, das ergänzt wird durch die Getriebehalterung, die Einzelteile der Lenkung und sämtliche kleineren Anbauteile. Die wichtigsten CAD-Modelle für einen groben Überblick über Aufbau und Struktur des Fahrzeugs liegen hier im Motorisierungsordner. Alle weiteren Modelle, die für den Bau notwendig sind, sind im CAD-Modelle Ordner zu finden.
 
 ![WhatsApp Bild 2023-06-02 um 20 43 51](https://github.com/LukasWombacher/Artemis-Alpha/assets/109914834/365a3e83-a1d9-45f7-b352-c97477efa7b5)
 
