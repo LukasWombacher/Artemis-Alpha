@@ -12,7 +12,7 @@ Der Raspberry Pi wird von einem passenden Power Hat immer genau mit der benötig
 
 Zur Orientierung auf dem SPielfeld und der Erkennung von Hindernissenist das Fahrzeug mit verschiedenen Sensoren ausgestattet.
 Zur groben Orientierung sind 3 Ultraschallsensoren verbaut die vorne und an den Seiten angebracht sind. Sie ermöglichen Abstandsmessungen zur Spielfeldbegrenzung.
-Des weiteren ist ein Gyroskop und Magnetometer in der Bodenplatte verbaut. Dieser misst kontinuierlich die Rotationsgeschwindigkeit und errchnet daraus seinen Winkel relativ zur Startposition. Dadurch kann in Kurven exakt gelenkt werden und eine perfekte Ausrichtung auf dem Spielfeld wird gewährleistet.
+Des weiteren ist ein Gyroskop und Beschleunigungssensor in der Bodenplatte verbaut. Dieser misst kontinuierlich die Rotationsgeschwindigkeit und errchnet daraus seinen Winkel relativ zur Startposition. Dadurch kann in Kurven exakt gelenkt werden und eine perfekte Ausrichtung auf dem Spielfeld wird gewährleistet.
 Das Herzstück der Sensoren für das Hindernisrennen ist die Kamera. Sie erkennt Hindernisse, kategorisiert diese nach Farben und errechnet auf Basis der Größe und Abmessungen die Entfernung und Position. Es handelt sich um eine 180° Weitwinkelkamera, dadurch können nicht nur Hindernisse nach vorne, sondern auch noch neben der Kamera erkannt werden. Sie ist außerdem mit Infrarotleuchtmitteln ausgestattet um bei allen Lichtverhältnissen ein klares Bild zu errechnen.
 
 ![20230531_172955](https://github.com/LukasWombacher/Artemis-Alpha/assets/109914834/91277caa-cfe3-4a29-a809-8140bc1d091a)
