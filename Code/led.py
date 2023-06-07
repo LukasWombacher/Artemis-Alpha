@@ -55,7 +55,7 @@ def wheel(pos):
         return Color(0, pos * 3, 255 - pos * 3)
 
 
-def rainbow(strip, wait_ms=20, iterations=1):
+def rainbow(strip, wait_ms=0, iterations=1):
     """Draw rainbow that fades across all pixels at once."""
     for j in range(256 * iterations):
         for i in range(strip.numPixels()):
@@ -67,9 +67,9 @@ def rainbow(strip, wait_ms=20, iterations=1):
 def rainbowCycle(strip, wait_ms=20, iterations=5):
     """Draw rainbow that uniformly distributes itself across all pixels."""
     for j in range(256 * iterations):
-        for i in range(strip.numPixels()):
-            strip.setPixelColor(i, wheel(
-                (int(i * 256 / strip.numPixels()) + j) & 255))
+        for i in range(11): #strip.numPixels()
+            strip.setPixelColor(i, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
+            strip.setPixelColor(i+11, wheel((int(i * 256 / strip.numPixels()) + j) & 255))
         strip.show()
         time.sleep(wait_ms / 1000.0)
 
@@ -85,6 +85,19 @@ def theaterChaseRainbow(strip, wait_ms=50):
             for i in range(0, strip.numPixels(), 3):
                 strip.setPixelColor(i + q, 0)
 
+def drive():
+    rainbow(strip)
+
+def side_alert():
+    wait_ms=20
+    for i in range(11):
+        strip.setPixelColor(i+(0*11), Color(255, 205, 0))
+        strip.show()
+        time.sleep(wait_ms / 1000.0)
+    
+
+def clear():
+    colorWipe(strip, Color(0, 0, 0), 10)
 
 # Main program logic follows:
 
@@ -97,27 +110,6 @@ args = parser.parse_args()
 strip = PixelStrip(LED_COUNT, LED_PIN, LED_FREQ_HZ, LED_DMA, LED_INVERT, LED_BRIGHTNESS, LED_CHANNEL)
 # Intialize the library (must be called once before other functions).
 strip.begin()
-
-print('Press Ctrl-C to quit.')
-if not args.clear:
-    print('Use "-c" argument to clear LEDs on exit')
-
-try:
-
-    while True:
-        print('Color wipe animations.')
-        colorWipe(strip, Color(255, 0, 0))  # Red wipe
-        colorWipe(strip, Color(0, 255, 0))  # Green wipe
-        colorWipe(strip, Color(0, 0, 255))  # Blue wipe
-        print('Theater chase animations.')
-        theaterChase(strip, Color(127, 127, 127))  # White theater chase
-        theaterChase(strip, Color(127, 0, 0))  # Red theater chase
-        theaterChase(strip, Color(0, 0, 127))  # Blue theater chase
-        print('Rainbow animations.')
-        rainbow(strip)
-        rainbowCycle(strip)
-        theaterChaseRainbow(strip)
-
-except KeyboardInterrupt:
-    if args.clear:
-        colorWipe(strip, Color(0, 0, 0), 10)
+while True:
+    #rainbowCycle(strip)
+    clear()
