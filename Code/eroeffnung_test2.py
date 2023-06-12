@@ -56,22 +56,11 @@ next_pos = 0
 curve_goal = 4*3
 v_kurve = 100
 v_gerade = 100
-v_start = 100
-
-sensor_front = 0
-sensor_left = 0
-sensor_right = 0
-
-starttime = time.time_ns()
+v_start = v_gerade
 
 """
 überprüft in welche Richtung das Auto ausgerichtet ist und ob in oder gegen den Uhrzeigersinn gefahren wird
 """
-def log (str):
-    duration  = time.time_ns() - starttime
-    
-    # print (duration.str())
-    print(str)
 
 def get_start_direction():
     global direction, distance_left, distance_right
@@ -79,7 +68,7 @@ def get_start_direction():
     len = 2
     pos = 0
     while direction == 2:
-        time.sleep(0.01)
+        time.sleep(0.001)
         sensor()
         distance_left[pos % len], distance_right[pos % len] = ultrasonic.get_distance("ultrasonic_left"), ultrasonic.get_distance("ultrasonic_right")
         ## print('get_start_direction - distance: %10.2f %10.2f' %  (distance_left[pos % len],  distance_right[pos % len]))
@@ -108,16 +97,17 @@ prüft ob die nächste Kurve gefahren werden kann
 """
       
 def is_next_curve():
-    global direction, d_switch
+    global direction, d_switch, distance_front, distance_side, next_len, next_pos
 
     ##sensor()
     
-    sensor_front = ultrasonic.get_distance("ultrasonic_front")
-    sensor_side = ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
+    distance_front = ultrasonic.get_distance("ultrasonic_front")
+    distance_side = ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
 
+    ## print('is_next_curve - front: %10.2f side:%10.2f' %  (distance_front,  distance_side))
  
-    if (10 < sensor_front < 60) and (150 < sensor_side < 1000):
-        print("is_next_curve true, direction:" + d_switch[direction] + ", sensor_front:" + str(sensor_front) + ", sensor_side:" + str(sensor_side))
+    if (0 < distance_front < 60) and (150 < distance_side < 1000):
+        print("is_next_curve true, direction:" + d_switch[direction] + ", front:" + str(distance_front) + ", side:" + str(distance_side))
         return True
     else:
         return False
@@ -152,51 +142,52 @@ def side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed):
     stepper_motor.turn_distance(100, round(abs(lenk)), anti_lenk_direction)
 
 def sensor():
-    global sensor_left, sensor_right, sensor_front
-    sensor_front = ultrasonic.get_distance("ultrasonic_front")
-    sensor_left = ultrasonic.get_distance("ultrasonic_left")
-    sensor_right = ultrasonic.get_distance("ultrasonic_right")
-    print('sensor - direction:' + d_switch[direction] + ' - lfr: %6.1f %6.1f %6.1f' % (sensor_left , sensor_front , sensor_right))
+    global left, right, front
+    front = ultrasonic.get_distance("ultrasonic_front")
+    left = ultrasonic.get_distance("ultrasonic_left")
+    right = ultrasonic.get_distance("ultrasonic_right")
+    print('sensor - direction:' + d_switch[direction] + ' - lfr: %10.2f %10.1f %10.2f' % (left , front , right))
+
+"""
+geradenkorrektur
+"""
 
 def accurate():
     global curve_count, direction, d_switch
-    global sensor_left, sensor_right,sensor_front
+    global left, right, front
+    ## sensor()
 
-    sensor_left = ultrasonic.get_distance("ultrasonic_left")
-    sensor_right = ultrasonic.get_distance("ultrasonic_right")
+    left = ultrasonic.get_distance("ultrasonic_left")
+    right = ultrasonic.get_distance("ultrasonic_right")
     
     correction_delta = 0
+    correction_direction = 2
+    correct_angle = 0
     correct_time = 0
     
-    if sensor_left < 90 and sensor_right < 90:
-        correction_direction = 2
-        correct_angle = 0
-        correct_time = 0
-
+    if left < 90 and right < 90:
+        correction_delta = abs(right - left)
         
-        if (sensor_right > sensor_left):
+        if (right > left):
             correction_direction = 1
-            correction_delta = sensor_right - sensor_left
         else:
             correction_direction = 0
-            correction_delta = sensor_left - sensor_right
             
-    ## geradenkorrektur
     if correction_delta > 5:
         correct_time = 0.2
-        correct_angle = 5
+        correct_angle = 10
 
-    if correction_delta > 30:
-        correct_time = 0.4
-        correct_angle = 15
+    #if correction_delta > 30:
+    #    correct_time = 0.2
+    #    correct_angle = 20
         
     if (correct_time > 0):    
         print('correction_direction:' + d_switch[correction_direction]  + ', correct_angle:' + str (correct_angle) + ', delta:' + str(correction_delta))
         stepper_motor.turn_distance(100, correct_angle, d_switch[correction_direction]) 
         time.sleep(correct_time)
-        stepper_motor.turn_distance(100, correct_angle*2, d_switch[not correction_direction]) 
+        stepper_motor.turn_distance(100, correct_angle + 5, d_switch[not correction_direction]) 
         time.sleep(0.1)
-        stepper_motor.turn_distance(100, correct_angle, d_switch[correction_direction]) 
+        stepper_motor.turn_distance(100, 5, d_switch[correction_direction]) 
 
 
 """
@@ -206,8 +197,8 @@ fährt eine 90° Kurve
 def curve():
     global direction, d_switch, curve_count
     curve_count += 1
-    steer_angle = 30
-    steer_time = 2.3
+    steer_angle = 45
+    steer_time = 1.3
     drive_time = 1.0
     
     print("Kurve " + str(curve_count))
@@ -225,7 +216,6 @@ Main ist die Hauptroutine des Programms die standardmäßig ausgeführt wird und
 
 def main():
     global direction, d_switch, curve_count, running, curve_goal, distance_side, distance_front
-    global starttime
     print("start 1")
     """while not encoder_pressed:
         rotary_Change(0.1)
@@ -239,7 +229,6 @@ def main():
     time.sleep(1)"""
     drive_motor.speed = v_start
     print("start")
-    starttime = time.time_ns()    
     get_start_direction()
     ## print(d_switch[direction])
     drive_motor.speed = v_gerade

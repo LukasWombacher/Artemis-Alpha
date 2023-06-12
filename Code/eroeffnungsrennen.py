@@ -5,7 +5,7 @@ import time
 import gyroscope
 from threading import Thread
 import edit_json
-import display
+#import display
 import RPi.GPIO as GPIO
 import os
 
@@ -55,17 +55,16 @@ distance_side = [0]*2
 next_len = 2
 next_pos = 0
 curve_goal = 4*3
-correction_degree = 10
-v_kurve = 40
-v_gerade = 30
-v_messen = 30
+v_kurve = 100
+v_gerade = 100
+v_start = v_gerade
 
 """
 überprüft in welche Richtung das Auto ausgerichtet ist und ob in oder gegen den Uhrzeigersinn gefahren wird
 """
 
 def get_start_direction(distance):
-    global direction, distance_left, distance_right, correction_degree
+    global direction, distance_left, distance_right
     len = 2
     pos = 0
     while direction == 2:
@@ -86,7 +85,6 @@ def get_start_direction(distance):
                 direction = 0
             if right_big >= 2:
                 direction = 1
-                correction_degree *= -1
         print(distance_left)
         print(distance_right)
 
@@ -96,7 +94,7 @@ prüft ob die nächste Kurve gefahren werden kann
       
 def is_next_curve(opt_front_distance):
     global direction, d_switch, distance_front, distance_side, next_len, next_pos
-    distance_front[next_pos % next_len], distance_side[next_pos % next_len] = ultrasonic.get_distance("ultrasonic_front"), ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
+    """distance_front[next_pos % next_len], distance_side[next_pos % next_len] = ultrasonic.get_distance("ultrasonic_front"), ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
     next_pos += 1
     if next_pos >= next_len:
         next_front_smal = 0
@@ -113,15 +111,21 @@ def is_next_curve(opt_front_distance):
             return True
         else:
             return False
-    return False
-
+    return False"""
+    a = ultrasonic.get_distance("ultrasonic_front")
+    print(a)
+    if (0 < a < opt_front_distance) and (120 < ultrasonic.get_distance("ultrasonic_" + d_switch[direction]) < 1000):
+        return True
+    else:
+        return False
+    
 """
 überprüft ob die letzten 3 Messungen eines Ultraschallsensors über dem Schwellwert lagen, um nicht von Fehlerwerten beeinflusst zu werden
 """
 
 def ultrasonic_savety_smaler(sensor, distance, num):
     global true_count_smaler
-    for savety_smaler_count in range(0, 3):
+    for savety_smaler_count in range(0, 2):
         a = ultrasonic.get_distance(sensor)
         print(a)
         if a <= distance:
@@ -129,7 +133,7 @@ def ultrasonic_savety_smaler(sensor, distance, num):
         else:
             true_count_smaler[num] = 0
         time.sleep(0.01)
-    if true_count_smaler[num] >= 3:
+    if true_count_smaler[num] >= 2:
         true_count_smaler[num] = 0
         print("save smaler")
         return True
@@ -139,26 +143,43 @@ def ultrasonic_savety_smaler(sensor, distance, num):
 """
 stellt sicher das in den geraden ABschnitten geradeaus gefahren wird und korigiert falls schief oder gegen eine Wand gesteuert wird
 """
+def side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed):
+    stepper_motor.turn_distance(60, round(abs(lenk)), lenk_direction)
+    time.sleep(side_lenk_speed)
+    stepper_motor.turn_distance(100, round(abs(lenk)), anti_lenk_direction)
 
 def accurate():
-    global curve_count, direction, d_switch, correction_degree
-    if ultrasonic.get_distance("ultrasonic_left") <= 16:
-        lenk_direction, anti_lenk_direction = "right", "left"
-        lenk = 26
-        print("wand links")
-        stepper_motor.turn_distance(60, round(abs(lenk)), lenk_direction)
-        time.sleep(0.35)
-        stepper_motor.turn_distance(100, round(abs(lenk)), anti_lenk_direction)
-    elif ultrasonic.get_distance("ultrasonic_right") <= 16:
-        lenk_direction, anti_lenk_direction = "left", "right"
-        lenk = 26
-        print("wand rechts")
-        stepper_motor.turn_distance(60, round(abs(lenk)), lenk_direction)
-        time.sleep(0.35)
-        stepper_motor.turn_distance(100, round(abs(lenk)), anti_lenk_direction)
+    global curve_count, direction, d_switch
+    side_lenk_distance_close = 12
+    lenk_close = 32
+    side_lenk_speed_close = 0.35
+    if (ultrasonic.get_distance("ultrasonic_left") + ultrasonic.get_distance("ultrasonic_right")) <= 70:
+        side_lenk_distance = 18
+        lenk = 24
+        side_lenk_speed = 0.35
     else:
-        lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)-correction_degree))
-        lenk_faktor = 1
+        side_lenk_distance = 26
+        lenk = 28
+        side_lenk_speed = 0.4
+    if ultrasonic.get_distance("ultrasonic_left") <= side_lenk_distance_close:
+        lenk_direction, anti_lenk_direction = "right", "left"
+        print("wand links close")
+        side_lenk(lenk_close, lenk_direction, anti_lenk_direction, side_lenk_speed_close)
+    elif ultrasonic.get_distance("ultrasonic_left") <= side_lenk_distance:
+        lenk_direction, anti_lenk_direction = "right", "left"
+        print("wand links")
+        side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed)
+    elif ultrasonic.get_distance("ultrasonic_right") <= side_lenk_distance_close:
+        lenk_direction, anti_lenk_direction = "left", "right"
+        print("wand rechts close")
+        side_lenk(lenk_close, lenk_direction, anti_lenk_direction, side_lenk_speed_close)
+    elif ultrasonic.get_distance("ultrasonic_right") <= side_lenk_distance:
+        lenk_direction, anti_lenk_direction = "left", "right" 
+        print("wand rechts")
+        side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed)
+    else:
+        lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)))
+        lenk_faktor = 0.8
         lenk *= lenk_faktor
         print(lenk)
         lenk_direction = "right" if lenk > 0 else "left"
@@ -171,11 +192,11 @@ fährt eine 90° Kurve
 """
 
 def curve():
-    global direction, d_switch, curve_count, correction_degree
-    print("Kurve " + str(curve_count))
+    global direction, d_switch, curve_count
     curve_count += 1
+    print("Kurve " + str(curve_count))
     stepper_motor.turn_distance(100, 50, d_switch[direction])
-    while abs(gyroscope.get_abs_degree()) - (90*(curve_count-1)-correction_degree) < 72:
+    while abs(gyroscope.get_abs_degree()) - (90*(curve_count-1)) < 70:
         time.sleep(0.001)
     stepper_motor.turn_distance(100, 50, d_switch[not direction])
     print("lenk fertig")
@@ -187,7 +208,7 @@ Main ist die Hauptroutine des Programms die standardmäßig ausgeführt wird und
 def main():
     global direction, d_switch, curve_count, running, curve_goal, distance_side, distance_front
     print("start 1")
-    while not encoder_pressed:
+    """while not encoder_pressed:
         rotary_Change(0.1)
     display.icon("icon_settings.png")
     time.sleep(1)
@@ -197,32 +218,28 @@ def main():
     while not encoder_pressed:
         rotary_Change(0.1)
     display.logo("Artemis_Alpha.png")
-    time.sleep(1)
-    drive_motor.speed = v_messen
+    time.sleep(1)"""
+    gyroscope.restart()
+    drive_motor.speed = v_start
     print("start")
     get_start_direction(150)
     print(d_switch[direction])
-    drive_motor.speed = v_messen
-    while not is_next_curve(100):
+    drive_motor.speed = v_gerade
+    while not is_next_curve(60):
         time.sleep(0.01)
     drive_motor.speed = v_kurve
     curve()
     drive_motor.speed = v_gerade
     while running:
         distance_front, distance_side = [0]*3, [0]*3
-        """while not ultrasonic_savety_smaler("ultrasonic_front", 60, 0):
-            accurate()
-            time.sleep(0.01)
-        print("Korrektur Ende")"""
-        #drive_motor.speed = v_messen
-        while not is_next_curve(90):
+        while not is_next_curve(60):
             accurate()
             time.sleep(0.01)
         drive_motor.speed = v_kurve
         curve()
         drive_motor.speed = v_gerade
         if curve_count >= curve_goal:
-            while not ultrasonic_savety_smaler("ultrasonic_front", 165, 1):
+            while not ultrasonic_savety_smaler("ultrasonic_front", 150, 1):
                 accurate()
                 time.sleep(0.01)
             drive_motor.speed = 0
