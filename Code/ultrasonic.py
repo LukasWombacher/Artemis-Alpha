@@ -49,3 +49,16 @@ def get_distance(sensor, decimal_places=1):
     distance = (delay * speed_of_sound) / 2
     ## TODO eliminate wrong meassures (1 < distance < 4000)
     return round(distance, decimal_places)
+
+def get_safe_distance(sensor):
+    distance = int(get_distance(sensor))
+    
+    if distance < 1:
+        print("get_safe_distance:" + sensor + ", distance:" + str(distance))
+        distance = 0
+
+    if distance > 500:
+        print("get_safe_distance:" + sensor + ", distance:" + str(distance))
+        distance = 500
+    
+    return distance
