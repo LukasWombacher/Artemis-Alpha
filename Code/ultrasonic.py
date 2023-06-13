@@ -47,4 +47,5 @@ def get_distance(sensor, decimal_places=1):
         end_time = time.time()
     delay = end_time - start_time
     distance = (delay * speed_of_sound) / 2
+    ## TODO eliminate wrong meassures (1 < distance < 4000)
     return round(distance, decimal_places)
