@@ -58,6 +58,7 @@ curve_goal = 4*3
 v_kurve = 100
 v_gerade = 100
 v_start = v_gerade
+last_curve_timer = time.time()
 
 """
 überprüft in welche Richtung das Auto ausgerichtet ist und ob in oder gegen den Uhrzeigersinn gefahren wird
@@ -113,7 +114,6 @@ def is_next_curve(opt_front_distance):
             return False
     return False"""
     a = ultrasonic.get_distance("ultrasonic_front")
-    print(a)
     if (0 < a < opt_front_distance) and (120 < ultrasonic.get_distance("ultrasonic_" + d_switch[direction]) < 1000):
         return True
     else:
@@ -151,15 +151,15 @@ def side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed):
 def accurate():
     global curve_count, direction, d_switch
     side_lenk_distance_close = 12
-    lenk_close = 32
-    side_lenk_speed_close = 0.35
+    lenk_close = 26
+    side_lenk_speed_close = 0.4
     if (ultrasonic.get_distance("ultrasonic_left") + ultrasonic.get_distance("ultrasonic_right")) <= 70:
         side_lenk_distance = 18
-        lenk = 24
+        lenk = 22
         side_lenk_speed = 0.35
     else:
         side_lenk_distance = 26
-        lenk = 28
+        lenk = 26
         side_lenk_speed = 0.4
     if ultrasonic.get_distance("ultrasonic_left") <= side_lenk_distance_close:
         lenk_direction, anti_lenk_direction = "right", "left"
@@ -179,27 +179,29 @@ def accurate():
         side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed)
     else:
         lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)))
-        lenk_faktor = 0.8
+        lenk_faktor = 0.5
         lenk *= lenk_faktor
+        if lenk > 50: lenk = 50
         print(lenk)
         lenk_direction = "right" if lenk > 0 else "left"
         anti_lenk_direction = "left" if lenk > 0 else "right"
-        stepper_motor.turn_distance(45, round(abs(lenk)), lenk_direction)
-        stepper_motor.turn_distance(45, round(abs(lenk)), anti_lenk_direction)
+        stepper_motor.turn_distance(60, round(abs(lenk)), lenk_direction)
+        stepper_motor.turn_distance(60, round(abs(lenk)), anti_lenk_direction)
 
 """
 fährt eine 90° Kurve
 """
 
 def curve():
-    global direction, d_switch, curve_count
+    global direction, d_switch, curve_count, last_curve_timer
     curve_count += 1
     print("Kurve " + str(curve_count))
     stepper_motor.turn_distance(100, 50, d_switch[direction])
-    while abs(gyroscope.get_abs_degree()) - (90*(curve_count-1)) < 70:
+    while abs(gyroscope.get_abs_degree()) - (90*(curve_count-1)) < 65:
         time.sleep(0.001)
     stepper_motor.turn_distance(100, 50, d_switch[not direction])
     print("lenk fertig")
+    last_curve_timer = time.time()
 
 """
 Main ist die Hauptroutine des Programms die standardmäßig ausgeführt wird und die die anderen Funktionen aufruft und koordiniert.
@@ -232,7 +234,7 @@ def main():
     drive_motor.speed = v_gerade
     while running:
         distance_front, distance_side = [0]*3, [0]*3
-        while not is_next_curve(60):
+        while not is_next_curve(60) or ((time.time() - last_curve_timer) < 5):
             accurate()
             time.sleep(0.01)
         drive_motor.speed = v_kurve
