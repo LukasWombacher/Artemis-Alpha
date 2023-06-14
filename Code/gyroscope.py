@@ -6,6 +6,8 @@ from mpu9250_i2c import *
 from threading import Thread
 time.sleep(1) # delay necessary to allow mpu9250 to settle
 
+on_bool = True
+
 with open("/home/pi/Artemis-Alpha/Code/settings.json", "r") as settings_file:
     settings_data = json.load(settings_file)
     bias_x = settings_data["gyroscope_drift"]["x"]
@@ -20,7 +22,7 @@ end = 0
 wz = 1
 
 def record_degree():
-    while True:
+    while on_bool:
         global counter, wz, start, recording, stop_recording
         counter = {"round": 0, "sum_x": 0, "sum_y": 0, "sum_z": 0}
         start = time.time()
