@@ -8,6 +8,7 @@ import edit_json
 #import display
 import RPi.GPIO as GPIO
 import os
+import logger
 
 GPIO.setmode(GPIO.BCM)
 
@@ -58,7 +59,7 @@ curve_goal = 4*3
 v_kurve = 100
 v_gerade = 100
 v_start = v_gerade
-last_curve_timer = time.time()
+last_curve_timer = time.time() - 5
 
 """
 überprüft in welche Richtung das Auto ausgerichtet ist und ob in oder gegen den Uhrzeigersinn gefahren wird
@@ -70,7 +71,7 @@ def get_start_direction(distance):
     pos = 0
     while direction == 2:
         #time.sleep(0.1)
-        distance_left[pos % len], distance_right[pos % len] = ultrasonic.get_distance("ultrasonic_left"), ultrasonic.get_distance("ultrasonic_right")
+        distance_left[pos % len], distance_right[pos % len] = ultrasonic.get_safe_distance("ultrasonic_left"), ultrasonic.get_safe_distance("ultrasonic_right")
         pos += 1
         if pos >= len:
             left_big = 0
@@ -86,35 +87,23 @@ def get_start_direction(distance):
                 direction = 0
             if right_big >= 2:
                 direction = 1
-        print(distance_left)
-        print(distance_right)
+        print("get_start_direction:", distance_left, distance_right)
 
 """
 prüft ob die nächste Kurve gefahren werden kann
 """
       
 def is_next_curve(opt_front_distance):
-    global direction, d_switch, distance_front, distance_side, next_len, next_pos
-    """distance_front[next_pos % next_len], distance_side[next_pos % next_len] = ultrasonic.get_distance("ultrasonic_front"), ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
-    next_pos += 1
-    if next_pos >= next_len:
-        next_front_smal = 0
-        next_side_big = 0
-        for i in distance_front:
-            if 0 < i < opt_front_distance:
-                next_front_smal += 1
-        for i in distance_side:
-            if 120 < i < 1000:
-                next_side_big += 1
-        print(distance_side)
-        print(next_side_big, next_front_smal)
-        if next_front_smal >= 2 and next_side_big >= 2:
-            return True
-        else:
-            return False
-    return False"""
-    a = ultrasonic.get_distance("ultrasonic_front")
-    if (0 < a < opt_front_distance) and (120 < ultrasonic.get_distance("ultrasonic_" + d_switch[direction]) < 1000):
+    global direction, d_switch, last_curve_timer
+
+    if (time.time() - last_curve_timer) < 5:
+        return False
+
+
+    sensor_front = ultrasonic.get_distance("ultrasonic_front")
+    sensor_side = ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
+    
+    if (5 < sensor_front < opt_front_distance) and (120 < sensor_side < 500):
         return True
     else:
         return False
@@ -143,50 +132,115 @@ def ultrasonic_savety_smaler(sensor, distance, num):
 """
 stellt sicher das in den geraden ABschnitten geradeaus gefahren wird und korigiert falls schief oder gegen eine Wand gesteuert wird
 """
-def side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed):
-    stepper_motor.turn_distance(60, round(abs(lenk)), lenk_direction)
-    time.sleep(side_lenk_speed)
-    stepper_motor.turn_distance(100, round(abs(lenk)), anti_lenk_direction)
+def side_lenk(lenk_angle, lenk_direction, lenk_time):
+    global d_switch
+    print ("side_lenk", "lenk_angle", lenk_angle, "lenk_direction:", d_switch[lenk_direction], "lenk_time:", lenk_time)
+    stepper_motor.turn_distance(100, round(abs(lenk_angle)), d_switch[lenk_direction])
+    time.sleep(lenk_time)
+    stepper_motor.turn_distance(100, round(abs(lenk_angle)), d_switch[not lenk_direction])
 
 def accurate():
     global curve_count, direction, d_switch
-    side_lenk_distance_close = 12
-    lenk_close = 26
-    side_lenk_speed_close = 0.4
-    if (ultrasonic.get_distance("ultrasonic_left") + ultrasonic.get_distance("ultrasonic_right")) <= 70:
-        side_lenk_distance = 18
-        lenk = 22
-        side_lenk_speed = 0.35
+
+    sensor_left = ultrasonic.get_safe_distance("ultrasonic_left")
+    sensor_right = ultrasonic.get_safe_distance("ultrasonic_right")
+    
+    correction_delta = 0
+    correction_direction = 2
+    correct_angle = 0
+    correct_time = 0
+    stepper_speed = 60
+    
+    smaller_distance = 0
+    
+    if sensor_left < 40 or sensor_right < 40:
+        correction_delta = abs(sensor_right - sensor_left)
+        
+        if (sensor_left < 30):
+            correction_direction = 1
+            smaller_distance = sensor_left
+        if (sensor_right < 30):
+            correction_direction = 0
+            smaller_distance = sensor_right
+    
+    # no correction possible       
+    if 2 == correction_direction:
+        return
+    
+    #if correction_delta > 30:
+    #    correct_time = 0.4
+    #    correct_angle = 20
+    #elif correction_delta > 20:
+    #    correct_time = 0.4
+    #    correct_angle = 15
+    #elif correction_delta > 15:
+    #    correct_time = 0.3
+    #    correct_angle = 10
+
+    if smaller_distance < 10:
+        correct_time = 0.5
+        correct_angle = 20
+    elif smaller_distance < 20:
+        correct_time = 0.4
+        correct_angle = 15
+    elif smaller_distance < 30:
+        correct_time = 0.3
+        correct_angle = 10
+        
+    if (correct_time > 0):    
+        debug = "START correction " + d_switch[correction_direction]  
+        debug += " - sensor: " + str(sensor_left) + "," + str(sensor_right)
+        debug += " , correct_angle:" + str (correct_angle) + ', delta:' + str(correction_delta)
+        logger.log(logger.INFO, "(drive_straight) - " + debug)
+
+        stepper_motor.turn_distance(stepper_speed, correct_angle, d_switch[correction_direction]) 
+        time.sleep(correct_time)
+        stepper_motor.turn_distance(stepper_speed, correct_angle, d_switch[not correction_direction]) 
+
+        sensor_left = ultrasonic.get_safe_distance("ultrasonic_left")
+        sensor_right = ultrasonic.get_safe_distance("ultrasonic_right")
+        debug = "  END correction " + d_switch[correction_direction]  
+        debug += " - sensor: " + str(sensor_left) + "," + str(sensor_right)
+        logger.log(logger.INFO, "(drive_straight) - " + debug)
+        
+def accurate_test():
+    global curve_count, direction, d_switch
+
+    side_lenk_time = 0.4
+    side_lenk_distance = 30
+    side_lenk_angle = 20
+
+    sensor_left = ultrasonic.get_safe_distance("ultrasonic_left")
+    sensor_right = ultrasonic.get_safe_distance("ultrasonic_right")
+    log_sensor = " - sensor_left:" + str(sensor_left) + ", sensor_right:" + str(sensor_right)
+    
+    # narrow ? 
+    if (sensor_left + sensor_right) <= 70:
+        side_lenk_distance = 15
+        side_lenk_angle = 20
+        side_lenk_time = 0.4
+        
+    if sensor_left <= side_lenk_distance:
+        print("wand links distance:" , side_lenk_distance, log_sensor)
+        side_lenk(side_lenk_angle, 1, side_lenk_time)
+    elif sensor_right <= side_lenk_distance:
+        print("wand rechts", log_sensor)
+        side_lenk(side_lenk_angle, 0, side_lenk_time)
     else:
-        side_lenk_distance = 26
-        lenk = 26
-        side_lenk_speed = 0.4
-    if ultrasonic.get_distance("ultrasonic_left") <= side_lenk_distance_close:
-        lenk_direction, anti_lenk_direction = "right", "left"
-        print("wand links close")
-        side_lenk(lenk_close, lenk_direction, anti_lenk_direction, side_lenk_speed_close)
-    elif ultrasonic.get_distance("ultrasonic_left") <= side_lenk_distance:
-        lenk_direction, anti_lenk_direction = "right", "left"
-        print("wand links")
-        side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed)
-    elif ultrasonic.get_distance("ultrasonic_right") <= side_lenk_distance_close:
-        lenk_direction, anti_lenk_direction = "left", "right"
-        print("wand rechts close")
-        side_lenk(lenk_close, lenk_direction, anti_lenk_direction, side_lenk_speed_close)
-    elif ultrasonic.get_distance("ultrasonic_right") <= side_lenk_distance:
-        lenk_direction, anti_lenk_direction = "left", "right" 
-        print("wand rechts")
-        side_lenk(lenk, lenk_direction, anti_lenk_direction, side_lenk_speed)
-    else:
-        lenk = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)))
-        lenk_faktor = 0.5
-        lenk *= lenk_faktor
-        if lenk > 50: lenk = 50
-        print(lenk)
-        lenk_direction = "right" if lenk > 0 else "left"
-        anti_lenk_direction = "left" if lenk > 0 else "right"
-        stepper_motor.turn_distance(60, round(abs(lenk)), lenk_direction)
-        stepper_motor.turn_distance(60, round(abs(lenk)), anti_lenk_direction)
+        side_lenk_angle = (gyroscope.get_abs_degree() + (90*curve_count*((2*direction)-1)))
+        lenk_faktor = 0.2
+        side_lenk_angle *= lenk_faktor
+        if side_lenk_angle > 10: side_lenk_angle = 10
+        
+        lenk_direction = "right" if side_lenk_angle > 0 else "left"
+        anti_lenk_direction = "left" if side_lenk_angle > 0 else "right"
+        return
+    
+        if abs(side_lenk_angle) > 4:
+            print("gyro korrektur:", side_lenk_angle, log_sensor)
+            stepper_motor.turn_distance(60, round(abs(side_lenk_angle)), lenk_direction)
+            time.sleep(0.05)
+            stepper_motor.turn_distance(60, round(abs(side_lenk_angle)), anti_lenk_direction)
 
 """
 fährt eine 90° Kurve
@@ -195,9 +249,24 @@ fährt eine 90° Kurve
 def curve():
     global direction, d_switch, curve_count, last_curve_timer
     curve_count += 1
+    steer_angle = 45
+    steer_time = 1.3
+    drive_time = 1.0
+    
+    print("Kurve " + str(curve_count))
+    stepper_motor.turn_distance(100, steer_angle, d_switch[direction])
+    time.sleep(steer_time)
+    stepper_motor.turn_distance(100, steer_angle, d_switch[not direction])
+    print("lenk fertig")
+    last_curve_timer = time.time()
+
+
+def curve_gyro():
+    global direction, d_switch, curve_count, last_curve_timer
+    curve_count += 1
     print("Kurve " + str(curve_count))
     stepper_motor.turn_distance(100, 50, d_switch[direction])
-    while abs(gyroscope.get_abs_degree()) - (90*(curve_count-1)) < 65:
+    while abs(gyroscope.get_abs_degree()) - (90*(curve_count-1)) < 60:
         time.sleep(0.001)
     stepper_motor.turn_distance(100, 50, d_switch[not direction])
     print("lenk fertig")
@@ -234,7 +303,7 @@ def main():
     drive_motor.speed = v_gerade
     while running:
         distance_front, distance_side = [0]*3, [0]*3
-        while not is_next_curve(60) or ((time.time() - last_curve_timer) < 5):
+        while not is_next_curve(60):
             accurate()
             time.sleep(0.01)
         drive_motor.speed = v_kurve

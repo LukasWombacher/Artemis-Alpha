@@ -39,26 +39,35 @@ def get_distance(sensor, decimal_places=1):
     GPIO.output(pin_trigger[sensor], True)
     time.sleep(0.00001)
     GPIO.output(pin_trigger[sensor], False)
-    start_time = time.time()
-    end_time = time.time()
-    while GPIO.input(pin_echo[sensor]) == 0:
+    
+    init_time = time.time()
+    start_time = init_time
+    end_time = init_time
+    
+    # print("sensor:" + sensor + " - Start : " + str(time.time()- end_time))
+    while GPIO.input(pin_echo[sensor]) == 0 and time.time() - init_time < 0.1:
         start_time = time.time()
-    while GPIO.input(pin_echo[sensor]) == 1:
+    # print("sensor:" + sensor + " - 0 " + str(time.time()- start_time))        
+    while GPIO.input(pin_echo[sensor]) == 1 and time.time() - init_time < 0.2:
         end_time = time.time()
+    # print("sensor:" + sensor + " - 1 " + str(time.time()- start_time))        
+        
     delay = end_time - start_time
+    # print("sensor:" + sensor + " delay " + str(delay))        
     distance = (delay * speed_of_sound) / 2
     ## TODO eliminate wrong meassures (1 < distance < 4000)
+    # print("sensor:" + sensor + " distance " + str(distance))        
     return round(distance, decimal_places)
 
 def get_safe_distance(sensor):
     distance = int(get_distance(sensor))
     
     if distance < 1:
-        print("get_safe_distance:" + sensor + ", distance:" + str(distance))
+        print("ERROR **** get_safe_distance:" + sensor + ", distance:" + str(distance))
         distance = 0
 
     if distance > 500:
-        print("get_safe_distance:" + sensor + ", distance:" + str(distance))
+        print("ERROR **** get_safe_distance:" + sensor + ", distance:" + str(distance))
         distance = 500
     
     return distance
