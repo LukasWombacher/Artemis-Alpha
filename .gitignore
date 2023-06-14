@@ -1,4 +1,5 @@
 Code/__pycache__/*
 Code/log/*
 Code/pythonProject.code-workspace
-.vscode
+.vscode/*
+!.vscode/launch.json

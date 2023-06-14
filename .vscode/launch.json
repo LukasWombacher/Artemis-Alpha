@@ -1,0 +1,29 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Python: Aktuelle Datei (sudo)",
+            "type": "python",
+            "request": "launch",
+            "program": "${file}",
+            "console": "integratedTerminal",
+            "justMyCode": true,
+            "sudo": true
+        },
+        {
+            "name": "eroeffnungsrennen",
+            "type": "python",
+            "request": "launch",
+            "program": "/home/pi/Artemis-Alpha/Code/eroeffnungsrennen.py",
+            "justMyCode": true
+        }
+        ,
+        {
+            "name": "reset",
+            "type": "python",
+            "request": "launch",
+            "program": "/home/pi/Artemis-Alpha/Code/reset.py",
+            "justMyCode": true
+        }
+    ]
+}
