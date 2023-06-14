@@ -33,7 +33,7 @@ def accurate():
             time.sleep(0.001)
         stepper_motor.turn_distance(100, lenk, "right")
     elif (biggest_object[1]*(640-biggest_object[2])) > 6000 and biggest_object[0] == "grün":
-        print("ausweichen rot")
+        print("ausweichen grün")
         lenk = round((biggest_object[1]*(640-biggest_object[2]))/300)
         if lenk > 35:
             lenk = 35
@@ -44,7 +44,7 @@ def accurate():
         while abs(gyroscope.get_abs_degree()) - (90*(curve_count)) > 12:
             time.sleep(0.001)
         stepper_motor.turn_distance(100, lenk, "left")
-    elif ultrasonic.get_distance("ultrasonic_left") <= 16:
+    """elif ultrasonic.get_distance("ultrasonic_left") <= 16:
         lenk_direction, anti_lenk_direction = "right", "left"
         print("wand links")
         side_lenk(28, lenk_direction, anti_lenk_direction, 0.4)
@@ -60,7 +60,7 @@ def accurate():
         lenk_direction = "right" if lenk > 0 else "left"
         anti_lenk_direction = "left" if lenk > 0 else "right"
         stepper_motor.turn_distance(45, round(abs(lenk)), lenk_direction)
-        stepper_motor.turn_distance(45, round(abs(lenk)), anti_lenk_direction)
+        stepper_motor.turn_distance(45, round(abs(lenk)), anti_lenk_direction)"""
 
 def main():
     global biggest_object

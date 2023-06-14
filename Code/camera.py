@@ -13,7 +13,6 @@ def find_objects():
     cv2.imwrite("bild0.jpg", frame)
     frame = frame[240:250, 1:640] #480
     height, width = frame.shape[0], frame.shape[1]
-    print(width)
     frame2 = np.zeros((1, width, 3), np.uint8)
     for i in range(0, width):
         b, g, r = 0, 0, 0
@@ -37,7 +36,7 @@ def find_objects():
         if r >= 100 and g <= 80 and b <= 80:
             color[pixel] = "rot"
             frame3[0, pixel] = (0, 0, 255)
-        if g >= 30 and r <= 25 and b <= 45:
+        if g >= 60 and r <= 50 and b <= 80:
             color[pixel] = "grün"
             frame3[0, pixel] = (0, 255, 0)
     objects = [[0, 0, 0]]
@@ -61,7 +60,7 @@ def find_objects():
     return objects[:]
     
 
-if __name__=='__main__':
+"""if __name__=='__main__':
     while True:
         find_objects()
-        time.sleep(0.05)
+        time.sleep(0.05)"""
