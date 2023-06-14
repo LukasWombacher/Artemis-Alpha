@@ -2,7 +2,7 @@ import stepper_motor
 import ultrasonic
 import drive_motor
 import time
-import gyroscope
+# import gyroscope
 from threading import Thread
 import edit_json
 #import display
@@ -290,7 +290,7 @@ def main():
         rotary_Change(0.1)
     display.logo("Artemis_Alpha.png")
     time.sleep(1)"""
-    gyroscope.restart()
+    #gyroscope.restart()
     drive_motor.speed = v_start
     print("start")
     get_start_direction(150)
@@ -323,10 +323,10 @@ def main():
 es werden Threads gestartet um mehrere Messungen und Abläufe in Echtzeit parallel ausführen zu können
 """
 
-thread_1 = Thread(target=gyroscope.record_degree)
-thread_2 = Thread(target=main)
-thread_3 = Thread(target=drive_motor.on)
+thread_1 = Thread(target=main)
+thread_2 = Thread(target=drive_motor.on)
+# thread_3 = Thread(target=gyroscope.record_degree)
 
 thread_1.start()
 thread_2.start()
-thread_3.start()
+# thread_3.start()
