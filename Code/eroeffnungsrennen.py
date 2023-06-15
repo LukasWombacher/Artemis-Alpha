@@ -45,7 +45,7 @@ setzt alle wichtigen Konstanten und Variabeln
 """
 
 direction = 2
-d_switch = ["left", "right", "error"]
+d_switch = ["left", "right", "unknown"]
 curve_count = 0
 running = True
 true_count_smaler = [0, 0]
@@ -82,12 +82,11 @@ def get_start_direction(distance):
             for i in distance_right:
                 if distance < i < 500:
                     right_big += 1
-            print(left_big, right_big)
             if left_big >= 2:
                 direction = 0
             if right_big >= 2:
                 direction = 1
-        print("get_start_direction:", distance_left, distance_right)
+        logger.log(logger.DEBUG, "(get_start_direction) left, right" + str(distance_left) + str(distance_right))
 
 """
 prüft ob die nächste Kurve gefahren werden kann
@@ -147,50 +146,72 @@ def accurate():
     
     correction_delta = 0
     correction_direction = 2
+    narrow_side = 2
     correct_angle = 0
     correct_time = 0
-    stepper_speed = 60
+    stepper_speed = 100
     
     smaller_distance = 0
-    
-    if sensor_left < 40 or sensor_right < 40:
-        correction_delta = abs(sensor_right - sensor_left)
+    if False:
+        if sensor_left < 40 or sensor_right < 40:
+            correction_delta = abs(sensor_right - sensor_left)
+            
+            if (sensor_left < 30):
+                narrow_side = 0
+                correction_direction = 1
+                smaller_distance = sensor_left
+            if (sensor_right < 30):
+                narrow_side = 1
+                correction_direction = 0
+                smaller_distance = sensor_right
+                
+        if smaller_distance < 10:
+            correct_time = 0.5
+            correct_angle = 20
+        elif smaller_distance < 15:
+            correct_time = 0.4
+            correct_angle = 15
+        elif smaller_distance < 20:
+            correct_time = 0.3
+            correct_angle = 10
+
+    if True:
+        if sensor_left < 90 and sensor_right < 90:
+            correction_delta = abs(sensor_right - sensor_left)
+            
+            if (sensor_right > sensor_left):
+                narrow_side = 0
+                correction_direction = 1
+                smaller_distance = sensor_left
+            else:
+                narrow_side = 1
+                correction_direction = 0
+                smaller_distance = sensor_right
+                
+        if correction_delta > 30:
+            correct_time = 0.5
+            correct_angle = 20
+        elif correction_delta > 20:
+            correct_time = 0.4
+            correct_angle = 15
+        elif correction_delta > 15:
+            correct_time = 0.3
+            correct_angle = 10
+            
+        if smaller_distance > 20:
+            correct_angle /= 2
         
-        if (sensor_left < 30):
-            correction_direction = 1
-            smaller_distance = sensor_left
-        if (sensor_right < 30):
-            correction_direction = 0
-            smaller_distance = sensor_right
-    
     # no correction possible       
     if 2 == correction_direction:
         return
     
-    #if correction_delta > 30:
-    #    correct_time = 0.4
-    #    correct_angle = 20
-    #elif correction_delta > 20:
-    #    correct_time = 0.4
-    #    correct_angle = 15
-    #elif correction_delta > 15:
-    #    correct_time = 0.3
-    #    correct_angle = 10
 
-    if smaller_distance < 10:
-        correct_time = 0.5
-        correct_angle = 20
-    elif smaller_distance < 20:
-        correct_time = 0.4
-        correct_angle = 15
-    elif smaller_distance < 30:
-        correct_time = 0.3
-        correct_angle = 10
         
     if (correct_time > 0):    
-        debug = "START correction " + d_switch[correction_direction]  
+        debug = "START correction"
         debug += " - sensor: " + str(sensor_left) + "," + str(sensor_right)
-        debug += " , correct_angle:" + str (correct_angle) + ', delta:' + str(correction_delta)
+        debug += ", narrow:" + d_switch[narrow_side] + " => drive:"+ d_switch[correction_direction]  
+        debug += "correct_time:" + str(correct_time)  + ', delta:' + str(correction_delta) + ", correct_angle:" + str(correct_angle)
         logger.log(logger.INFO, "(drive_straight) - " + debug)
 
         stepper_motor.turn_distance(stepper_speed, correct_angle, d_switch[correction_direction]) 
@@ -199,11 +220,12 @@ def accurate():
 
         sensor_left = ultrasonic.get_safe_distance("ultrasonic_left")
         sensor_right = ultrasonic.get_safe_distance("ultrasonic_right")
-        debug = "  END correction " + d_switch[correction_direction]  
+        debug = "  END correction" 
         debug += " - sensor: " + str(sensor_left) + "," + str(sensor_right)
         logger.log(logger.INFO, "(drive_straight) - " + debug)
-        
-def accurate_test():
+
+"""
+def accurate_gyro():
     global curve_count, direction, d_switch
 
     side_lenk_time = 0.4
@@ -241,6 +263,7 @@ def accurate_test():
             stepper_motor.turn_distance(60, round(abs(side_lenk_angle)), lenk_direction)
             time.sleep(0.05)
             stepper_motor.turn_distance(60, round(abs(side_lenk_angle)), anti_lenk_direction)
+"""        
 
 """
 fährt eine 90° Kurve
@@ -261,6 +284,7 @@ def curve():
     last_curve_timer = time.time()
 
 
+"""        
 def curve_gyro():
     global direction, d_switch, curve_count, last_curve_timer
     curve_count += 1
@@ -271,6 +295,7 @@ def curve_gyro():
     stepper_motor.turn_distance(100, 50, d_switch[not direction])
     print("lenk fertig")
     last_curve_timer = time.time()
+"""        
 
 """
 Main ist die Hauptroutine des Programms die standardmäßig ausgeführt wird und die die anderen Funktionen aufruft und koordiniert.
@@ -292,9 +317,10 @@ def main():
     time.sleep(1)"""
     #gyroscope.restart()
     drive_motor.speed = v_start
-    print("start")
+    logger.log(logger.INFO, "(main) start")
     get_start_direction(150)
-    print(d_switch[direction])
+    logger.log(logger.INFO, "(main) start direction:" + str(d_switch[direction]))
+
     drive_motor.speed = v_gerade
     while not is_next_curve(60):
         time.sleep(0.01)

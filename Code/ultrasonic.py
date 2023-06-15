@@ -66,8 +66,8 @@ def get_safe_distance(sensor):
         print("ERROR **** get_safe_distance:" + sensor + ", distance:" + str(distance))
         distance = 0
 
-    if distance > 500:
+    if distance > 999:
         print("ERROR **** get_safe_distance:" + sensor + ", distance:" + str(distance))
-        distance = 500
+        distance = 999
     
     return distance
