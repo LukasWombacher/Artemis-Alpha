@@ -1,5 +1,4 @@
 import cv2, time
-import  pyshine as ps
 import numpy as np
 
 
