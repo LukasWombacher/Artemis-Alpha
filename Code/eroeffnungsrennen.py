@@ -98,7 +98,6 @@ def is_next_curve(opt_front_distance):
     if (time.time() - last_curve_timer) < 5:
         return False
 
-
     sensor_front = ultrasonic.get_distance("ultrasonic_front")
     sensor_side = ultrasonic.get_distance("ultrasonic_" + d_switch[direction])
     
@@ -224,7 +223,7 @@ def accurate():
         debug += " - sensor: " + str(sensor_left) + "," + str(sensor_right)
         logger.log(logger.INFO, "(drive_straight) - " + debug)
 
-"""
+
 def accurate_gyro():
     global curve_count, direction, d_switch
 
@@ -262,8 +261,7 @@ def accurate_gyro():
             print("gyro korrektur:", side_lenk_angle, log_sensor)
             stepper_motor.turn_distance(60, round(abs(side_lenk_angle)), lenk_direction)
             time.sleep(0.05)
-            stepper_motor.turn_distance(60, round(abs(side_lenk_angle)), anti_lenk_direction)
-"""        
+            stepper_motor.turn_distance(60, round(abs(side_lenk_angle)), anti_lenk_direction)     
 
 """
 fährt eine 90° Kurve
@@ -283,8 +281,7 @@ def curve():
     print("lenk fertig")
     last_curve_timer = time.time()
 
-
-"""        
+        
 def curve_gyro():
     global direction, d_switch, curve_count, last_curve_timer
     curve_count += 1
@@ -295,7 +292,7 @@ def curve_gyro():
     stepper_motor.turn_distance(100, 50, d_switch[not direction])
     print("lenk fertig")
     last_curve_timer = time.time()
-"""        
+
 
 """
 Main ist die Hauptroutine des Programms die standardmäßig ausgeführt wird und die die anderen Funktionen aufruft und koordiniert.
@@ -304,6 +301,7 @@ Main ist die Hauptroutine des Programms die standardmäßig ausgeführt wird und
 def main():
     global direction, d_switch, curve_count, running, curve_goal, distance_side, distance_front
     thread_2.start()
+    # thread_3.start()
     print("start 1")
     while not encoder_pressed:
         rotary_Change(0.1)
