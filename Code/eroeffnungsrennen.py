@@ -5,7 +5,7 @@ import time
 # import gyroscope
 from threading import Thread
 import edit_json
-#import display
+import display
 import RPi.GPIO as GPIO
 import os
 import logger
@@ -303,18 +303,19 @@ Main ist die Hauptroutine des Programms die standardmäßig ausgeführt wird und
 
 def main():
     global direction, d_switch, curve_count, running, curve_goal, distance_side, distance_front
+    thread_2.start()
     print("start 1")
-    """while not encoder_pressed:
+    while not encoder_pressed:
         rotary_Change(0.1)
     display.icon("icon_settings.png")
     time.sleep(1)
-    gyroscope.restart()
+    #gyroscope.restart()
     time.sleep(0.5)
     display.icon("icon_programs.png")
     while not encoder_pressed:
         rotary_Change(0.1)
     display.logo("Artemis_Alpha.png")
-    time.sleep(1)"""
+    time.sleep(0.5)
     #gyroscope.restart()
     drive_motor.speed = v_start
     logger.log(logger.INFO, "(main) start")
@@ -353,6 +354,6 @@ thread_1 = Thread(target=main)
 thread_2 = Thread(target=drive_motor.on)
 # thread_3 = Thread(target=gyroscope.record_degree)
 
-thread_1.start()
-thread_2.start()
-# thread_3.start()
+#thread_1.start()
+#thread_2.start()
+## thread_3.start()

@@ -1,5 +1,5 @@
 {
-    "led_brightness": 70,
+    "led_brightness": 30,
     "led_speed": 100,
     "led_effekte": true,
     "led_matrix": true,

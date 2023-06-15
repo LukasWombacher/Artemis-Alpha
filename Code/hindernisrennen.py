@@ -64,6 +64,7 @@ def accurate():
 
 def main():
     global biggest_object
+    thread_3.start()
     print("start")
     gyroscope.restart()
     time.sleep(0.5)
@@ -77,6 +78,6 @@ thread_1 = Thread(target=gyroscope.record_degree)
 thread_2 = Thread(target=main)
 thread_3 = Thread(target=drive_motor.on)
 
-thread_1.start()
-thread_2.start()
-thread_3.start()
+#thread_1.start()
+#thread_2.start()
+#thread_3.start()

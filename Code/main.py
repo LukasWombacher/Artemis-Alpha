@@ -4,7 +4,9 @@ from datetime import datetime
 import drive_motor
 import stepper_motor
 import time
+import edit_json
 
+main_on = True
 
 #config logger
 
@@ -22,7 +24,7 @@ def main():
 start main function
 """
 
-while(True):
+while(edit_json.get_variable("on") == True):
     main()
-
+    print("main")
 
